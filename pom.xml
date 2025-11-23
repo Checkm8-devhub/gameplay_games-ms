@@ -7,8 +7,8 @@
 
   <modules>
     <module>api</module>
-    <module>business-logic</module>
-    <module>persistence</module>
+    <module>service</module>
+    <module>repository</module>
   </modules>
 
   <name>gameplay-games-ms</name>
@@ -65,13 +65,13 @@
 
       <dependency>
         <groupId>com.checkm8.gameplay.games.ms</groupId>
-        <artifactId>business-logic</artifactId>
+        <artifactId>service</artifactId>
         <version>${project.version}</version>
       </dependency>
 
       <dependency>
         <groupId>com.checkm8.gameplay.games.ms</groupId>
-        <artifactId>persistence</artifactId>
+        <artifactId>repository</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>

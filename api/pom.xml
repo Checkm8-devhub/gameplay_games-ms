@@ -42,7 +42,7 @@
 
     <dependency>
       <groupId>com.checkm8.gameplay.games.ms</groupId>
-      <artifactId>business-logic</artifactId>
+      <artifactId>service</artifactId>
     </dependency>
 
   </dependencies>
