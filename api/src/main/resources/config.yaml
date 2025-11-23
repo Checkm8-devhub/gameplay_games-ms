@@ -1,0 +1,11 @@
+kumuluzee:
+  name: api
+  version: 1.0.0
+  env:
+    name: dev
+  datasources: # postgresql datasource
+    - jndi-name: jdbc/gamesDB
+      connection-url: jdbc:postgresql://localhost:5432/games
+      username: postgres
+      password: postgres
+      max-pool-size: 20

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.checkm8.gameplay.games.ms</groupId>
+  <artifactId>gameplay-games-ms</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>api</module>
+    <module>business-logic</module>
+    <module>persistence</module>
+  </modules>
+
+  <name>gameplay-games-ms</name>
+
+  <!-- FIXME change it to the project's website -->
+  <url>http://www.example.com</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.release>17</maven.compiler.release>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+    <kumuluzee.version>4.1.0</kumuluzee.version>
+    <kumuluzee.rest.version>3.0.1</kumuluzee.rest.version>
+    <postgresql.version>42.7.8</postgresql.version>
+  </properties>
+
+  <!-- outside dependencies (only named) -->
+  <dependencyManagement>
+    <dependencies>
+      <!-- <dependency> -->
+      <!--   <groupId>org.junit</groupId> -->
+      <!--   <artifactId>junit-bom</artifactId> -->
+      <!--   <version>5.11.0</version> -->
+      <!--   <type>pom</type> -->
+      <!--   <scope>import</scope> -->
+      <!-- </dependency> -->
+
+      <dependency>
+        <groupId>com.kumuluz.ee</groupId>
+        <artifactId>kumuluzee-bom</artifactId>
+        <version>${kumuluzee.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>com.kumuluz.ee.rest</groupId>
+        <artifactId>kumuluzee-rest-core</artifactId>
+        <version>${kumuluzee.rest.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>${postgresql.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.checkm8.gameplay.games.ms</groupId>
+        <artifactId>api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.checkm8.gameplay.games.ms</groupId>
+        <artifactId>business-logic</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.checkm8.gameplay.games.ms</groupId>
+        <artifactId>persistence</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+</project>

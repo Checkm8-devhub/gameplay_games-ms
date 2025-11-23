@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>gameplay-games-ms</artifactId>
+    <groupId>com.checkm8.gameplay.games.ms</groupId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>api</artifactId>
+
+  <dependencies>
+    <!-- <dependency> -->
+    <!--   <groupId>org.junit.jupiter</groupId> -->
+    <!--   <artifactId>junit-jupiter-api</artifactId> -->
+    <!--   <scope>test</scope> -->
+    <!-- </dependency> -->
+
+    <!-- kumuluz core implementation -->
+    <dependency>
+      <groupId>com.kumuluz.ee</groupId>
+      <artifactId>kumuluzee-core</artifactId>
+    </dependency>
+
+    <!-- kumuluz servlet implementation -->
+    <dependency>
+      <groupId>com.kumuluz.ee</groupId>
+      <artifactId>kumuluzee-servlet-jetty</artifactId>
+    </dependency>
+
+    <!-- kumuluz jax-rs implementation -->
+    <dependency>
+        <groupId>com.kumuluz.ee</groupId>
+        <artifactId>kumuluzee-jax-rs-jersey</artifactId>
+    </dependency>
+
+    <!-- kumuluz full REST -->
+    <dependency>
+        <groupId>com.kumuluz.ee.rest</groupId>
+        <artifactId>kumuluzee-rest-core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.checkm8.gameplay.games.ms</groupId>
+      <artifactId>business-logic</artifactId>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <plugins>
+        <!-- plugin za pakiranje mikrostoritve - potem loh sam runas .jar k ga nardi-->
+        <plugin>
+            <groupId>com.kumuluz.ee</groupId>
+            <artifactId>kumuluzee-maven-plugin</artifactId>
+            <version>${kumuluzee.version}</version>
+            <executions>
+                <execution>
+                    <id>package</id>
+                    <goals>
+                        <goal>repackage</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+  </build>
+
+</project>
