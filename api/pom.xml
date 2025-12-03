@@ -1,69 +1,86 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <artifactId>gameplay-games-ms</artifactId>
-    <groupId>com.checkm8.gameplay.games.ms</groupId>
-    <version>1.0-SNAPSHOT</version>
-  </parent>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>gameplay-games-ms</artifactId>
+        <groupId>com.checkm8.gameplay.games.ms</groupId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
 
-  <artifactId>api</artifactId>
+    <artifactId>api</artifactId>
+    <packaging>jar</packaging>
 
-  <dependencies>
-    <!-- <dependency> -->
-    <!--   <groupId>org.junit.jupiter</groupId> -->
-    <!--   <artifactId>junit-jupiter-api</artifactId> -->
-    <!--   <scope>test</scope> -->
-    <!-- </dependency> -->
+    <dependencies>
+        <!-- REST -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-rest</artifactId>
+        </dependency>
 
-    <!-- kumuluz core implementation -->
-    <dependency>
-      <groupId>com.kumuluz.ee</groupId>
-      <artifactId>kumuluzee-core</artifactId>
-    </dependency>
+        <!-- JSON -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-rest-jsonb</artifactId>
+        </dependency>
 
-    <!-- kumuluz servlet implementation -->
-    <dependency>
-      <groupId>com.kumuluz.ee</groupId>
-      <artifactId>kumuluzee-servlet-jetty</artifactId>
-    </dependency>
+        <!-- JPA / Hibernate -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-hibernate-orm</artifactId>
+        </dependency>
 
-    <!-- kumuluz jax-rs implementation -->
-    <dependency>
-        <groupId>com.kumuluz.ee</groupId>
-        <artifactId>kumuluzee-jax-rs-jersey</artifactId>
-    </dependency>
+        <!-- PostgreSQL driver -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-jdbc-postgresql</artifactId>
+        </dependency>
 
-    <!-- kumuluz full REST -->
-    <dependency>
-        <groupId>com.kumuluz.ee.rest</groupId>
-        <artifactId>kumuluzee-rest-core</artifactId>
-    </dependency>
+        <!-- OpenAPI -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-smallrye-openapi</artifactId>
+        </dependency>
 
-    <dependency>
-      <groupId>com.checkm8.gameplay.games.ms</groupId>
-      <artifactId>service</artifactId>
-    </dependency>
+        <!-- Swagger UI -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-swagger-ui</artifactId>
+        </dependency>
 
-  </dependencies>
+        <!-- modules -->
+        <dependency>
+            <groupId>com.checkm8.gameplay.games.ms</groupId>
+            <artifactId>repository</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.checkm8.gameplay.games.ms</groupId>
+            <artifactId>service</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 
-  <build>
-    <plugins>
-        <!-- plugin za pakiranje mikrostoritve - potem loh sam runas .jar k ga nardi-->
-        <plugin>
-            <groupId>com.kumuluz.ee</groupId>
-            <artifactId>kumuluzee-maven-plugin</artifactId>
-            <version>${kumuluzee.version}</version>
-            <executions>
-                <execution>
-                    <id>package</id>
-                    <goals>
-                        <goal>repackage</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
-    </plugins>
-  </build>
-
+    <!-- packagin plugin -->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>${quarkus.platform.group-id}</groupId>
+                <artifactId>quarkus-maven-plugin</artifactId>
+                <version>${quarkus.platform.version}</version>
+                <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>build</goal>
+                            <goal>generate-code</goal>
+                            <goal>generate-code-tests</goal>
+                            <goal>native-image-agent</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
