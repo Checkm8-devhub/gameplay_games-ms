@@ -17,8 +17,14 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
+import com.checkm8.gameplay.games.ms.api.v1.dtos.ActionRequest;
 import com.checkm8.gameplay.games.ms.beans.GamesBean;
 import com.checkm8.gameplay.games.ms.entities.Game;
+import com.checkm8.gameplay.games.ms.exceptions.GameNotFoundException;
+import com.checkm8.gameplay.games.ms.exceptions.IllegalMoveException;
+import com.checkm8.gameplay.games.ms.exceptions.InvalidGameTokenException;
+import com.checkm8.gameplay.games.ms.exceptions.InvalidUCIException;
+import com.checkm8.gameplay.games.ms.exceptions.NotYourTurnException;
 
 @ApplicationScoped
 @Path("games")
@@ -69,13 +75,30 @@ public class GamesResource {
             }).build();
     }
 
-    // // Expects game_token and type in body
-    // @POST
-    // @Path("{id}/actions")
-    // public Response handleAction() {
-    //
-    // }
+    // Expects game_token and type in body
+    @POST
+    @Path("{id}/actions")
+    public Response handleAction(@PathParam("id") Integer id, ActionRequest req) {
 
+        try {
+            gamesBean.handleAction(id, req.gameToken, req.moveUCI);
+            return Response.ok().build();
+
+        } catch (GameNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+        } catch (InvalidGameTokenException e) {
+            return Response.status(Response.Status.FORBIDDEN).entity(e.getMessage()).build();
+        } catch (NotYourTurnException e) {
+            return Response.status(Response.Status.FORBIDDEN).entity(e.getMessage()).build();
+        } catch (InvalidUCIException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        } catch (IllegalMoveException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+    }
     // ****************************************
     //  PUT
     // ****************************************

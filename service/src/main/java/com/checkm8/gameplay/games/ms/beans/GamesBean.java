@@ -8,6 +8,16 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
 import com.checkm8.gameplay.games.ms.entities.Game;
+import com.checkm8.gameplay.games.ms.exceptions.GameNotFoundException;
+import com.checkm8.gameplay.games.ms.exceptions.IllegalMoveException;
+import com.checkm8.gameplay.games.ms.exceptions.InvalidGameTokenException;
+import com.checkm8.gameplay.games.ms.exceptions.InvalidUCIException;
+import com.checkm8.gameplay.games.ms.exceptions.NotYourTurnException;
+import com.github.bhlangonijr.chesslib.Board;
+import com.github.bhlangonijr.chesslib.Piece;
+import com.github.bhlangonijr.chesslib.Side;
+import com.github.bhlangonijr.chesslib.Square;
+import com.github.bhlangonijr.chesslib.move.Move;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -67,5 +77,51 @@ public class GamesBean {
             return true;
         }
         return false;
+    }
+
+    @Transactional
+    public void handleAction(Integer id, String gameToken, String modeUCI) throws RuntimeException {
+
+        Game game = this.get(id);
+        if (game == null)
+            throw new GameNotFoundException("Game not found");
+        
+        // validate gameToken
+        boolean isWhite = game.getWhiteToken().equals(gameToken);
+        boolean isBlack = game.getBlackToken().equals(gameToken);
+        if (!isWhite && !isBlack)
+            throw new InvalidGameTokenException("Invalid game token");
+
+        // validate side
+        Board board = new Board();
+        board.loadFromFen(game.getFen());
+        Side side = board.getSideToMove();
+        if (!isWhite && side == Side.WHITE) throw new NotYourTurnException("It is white to move");
+        if (!isBlack && side == Side.BLACK) throw new NotYourTurnException("It is black to move");
+
+        // parse UCI
+        if (modeUCI == null || modeUCI.length() != 4 && modeUCI.length() != 5)
+            throw new InvalidUCIException("Invalid UCI");
+        String from = modeUCI.substring(0, 2).toUpperCase();
+        String to = modeUCI.substring(2, 4).toUpperCase();
+        String promotion = (modeUCI.length() == 5) ? modeUCI.substring(4, 5) : null;
+
+        // create move
+        Move move;
+        if (promotion != null) {
+            Piece promotionPiece = Piece.fromFenSymbol(promotion);
+            move = new Move(Square.fromValue(from), Square.fromValue(to), promotionPiece);
+        }
+        else move = new Move(Square.fromValue(from), Square.fromValue(to));
+
+        // validate move
+        if (!board.legalMoves().contains(move))
+            throw new IllegalMoveException("Illegal move");
+
+        // play move
+        board.doMove(move);
+        
+        // update FEN
+        game.setFen(board.getFen());
     }
 }

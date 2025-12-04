@@ -53,5 +53,11 @@
             <version>3.1.0</version>
             <scope>provided</scope>
         </dependency>
+
+        <!-- Chess lib --> 
+        <dependency>
+            <groupId>com.github.bhlangonijr</groupId>
+            <artifactId>chesslib</artifactId>
+        </dependency>
     </dependencies>
 </project>
