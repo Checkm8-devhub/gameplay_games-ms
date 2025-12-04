@@ -41,12 +41,15 @@ public class Game {
     private String fen;
     public static final String STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
+    private String winner;
+
     public static Game createStartingGame(String whiteToken, String blackToken) {
         Game game = new Game();
         game.whiteToken = whiteToken;
         game.blackToken = blackToken;
         game.status = GameStatus.PLAYING;
         game.fen = STARTING_FEN;
+        game.winner = null;
         
         return game;
     }
@@ -66,9 +69,12 @@ public class Game {
     public String getFen() { return this.fen; }
     public void setFen(String fen) { this.fen = fen; }
 
+    public String getWinner() { return winner; }
+    public void setWinner(String winner) { this.winner = winner; }
+
     @Override
     public String toString() {
         return "Game [id=" + id + ", whiteToken=" + whiteToken + ", blackToken=" + blackToken + ", status=" + status
-                + ", fen=" + fen + "]";
+                + ", fen=" + fen + ", winner=" + winner + "]";
     }
 }

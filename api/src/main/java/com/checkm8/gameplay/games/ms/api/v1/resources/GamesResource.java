@@ -21,6 +21,7 @@ import com.checkm8.gameplay.games.ms.api.v1.dtos.ActionRequest;
 import com.checkm8.gameplay.games.ms.beans.GamesBean;
 import com.checkm8.gameplay.games.ms.entities.Game;
 import com.checkm8.gameplay.games.ms.exceptions.GameNotFoundException;
+import com.checkm8.gameplay.games.ms.exceptions.GameNotActiveException;
 import com.checkm8.gameplay.games.ms.exceptions.IllegalMoveException;
 import com.checkm8.gameplay.games.ms.exceptions.InvalidGameTokenException;
 import com.checkm8.gameplay.games.ms.exceptions.InvalidUCIException;
@@ -75,17 +76,34 @@ public class GamesResource {
             }).build();
     }
 
-    // Expects game_token and type in body
+    // Expects game_token and actions in body
     @POST
     @Path("{id}/actions")
     public Response handleAction(@PathParam("id") Integer id, ActionRequest req) {
 
+        if (req == null)
+            return Response.status(Response.Status.BAD_REQUEST).entity("Request body required").build();
+        if (req.gameToken == null)
+            return Response.status(Response.Status.BAD_REQUEST).entity("Invalid game token").build();
+
         try {
-            gamesBean.handleAction(id, req.gameToken, req.moveUCI);
-            return Response.ok().build();
+            
+            if (req.resign) {
+                gamesBean.handleResignation(id, req.gameToken);
+                return Response.ok("resigned").build();
+            }
+
+            if (req.moveUCI != null) {
+                gamesBean.handleMove(id, req.gameToken, req.moveUCI);
+                return Response.ok("moved").build();
+            }
+
+            return Response.status(Response.Status.BAD_REQUEST).entity("Bad request body").build();
 
         } catch (GameNotFoundException e) {
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+        } catch (GameNotActiveException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         } catch (InvalidGameTokenException e) {
             return Response.status(Response.Status.FORBIDDEN).entity(e.getMessage()).build();
         } catch (NotYourTurnException e) {

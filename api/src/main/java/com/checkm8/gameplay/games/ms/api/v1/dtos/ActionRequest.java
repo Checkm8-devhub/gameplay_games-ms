@@ -5,4 +5,5 @@ public class ActionRequest {
     public String gameToken;
     public String moveUCI; // example: e2e4
                            //          e7e8q
+    public boolean resign;
 }

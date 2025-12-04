@@ -8,6 +8,8 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
 import com.checkm8.gameplay.games.ms.entities.Game;
+import com.checkm8.gameplay.games.ms.entities.Game.GameStatus;
+import com.checkm8.gameplay.games.ms.exceptions.GameNotActiveException;
 import com.checkm8.gameplay.games.ms.exceptions.GameNotFoundException;
 import com.checkm8.gameplay.games.ms.exceptions.IllegalMoveException;
 import com.checkm8.gameplay.games.ms.exceptions.InvalidGameTokenException;
@@ -79,18 +81,45 @@ public class GamesBean {
         return false;
     }
 
-    @Transactional
-    public void handleAction(Integer id, String gameToken, String modeUCI) throws RuntimeException {
-
-        Game game = this.get(id);
-        if (game == null)
-            throw new GameNotFoundException("Game not found");
-        
-        // validate gameToken
+    // returns true if white
+    public boolean validateGameToken(Game game, String gameToken) {
         boolean isWhite = game.getWhiteToken().equals(gameToken);
         boolean isBlack = game.getBlackToken().equals(gameToken);
         if (!isWhite && !isBlack)
             throw new InvalidGameTokenException("Invalid game token");
+
+        return isWhite ? true : false;
+    }
+
+    @Transactional
+    public void handleResignation(Integer id, String gameToken) {
+
+        Game game = this.get(id);
+        if (game == null)
+            throw new GameNotFoundException("Game not found");
+        if (game.getStatus() != GameStatus.PLAYING)
+            throw new GameNotActiveException("Game not active");
+
+        boolean isWhite = validateGameToken(game, gameToken);
+
+        if (isWhite) game.setWinner("b");
+        else         game.setWinner("w");
+
+        game.setStatus(GameStatus.FINISHED);
+    }
+
+    @Transactional
+    public void handleMove(Integer id, String gameToken, String modeUCI) {
+
+        Game game = this.get(id);
+        if (game == null)
+            throw new GameNotFoundException("Game not found");
+        if (game.getStatus() != GameStatus.PLAYING)
+            throw new GameNotActiveException("Game not active");
+        
+        // validate gameToken
+        boolean isWhite = validateGameToken(game, gameToken);
+        boolean isBlack = !isWhite;
 
         // validate side
         Board board = new Board();
