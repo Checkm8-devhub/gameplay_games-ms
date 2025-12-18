@@ -41,7 +41,13 @@ public class Game {
     private String fen;
     public static final String STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-    private String winner;
+    @Enumerated(EnumType.STRING)
+    private GameWinner winner;
+    public static enum GameWinner {
+        WHITE,
+        BLACK,
+        DRAW,
+    }
 
     public static Game createStartingGame(String whiteToken, String blackToken) {
         Game game = new Game();
@@ -69,8 +75,8 @@ public class Game {
     public String getFen() { return this.fen; }
     public void setFen(String fen) { this.fen = fen; }
 
-    public String getWinner() { return winner; }
-    public void setWinner(String winner) { this.winner = winner; }
+    public GameWinner getWinner() { return winner; }
+    public void setWinner(GameWinner winner) { this.winner = winner; }
 
     @Override
     public String toString() {

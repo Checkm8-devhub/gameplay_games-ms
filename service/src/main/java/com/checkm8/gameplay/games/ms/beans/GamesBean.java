@@ -9,6 +9,7 @@ import jakarta.transaction.Transactional;
 
 import com.checkm8.gameplay.games.ms.entities.Game;
 import com.checkm8.gameplay.games.ms.entities.Game.GameStatus;
+import com.checkm8.gameplay.games.ms.entities.Game.GameWinner;
 import com.checkm8.gameplay.games.ms.exceptions.GameNotActiveException;
 import com.checkm8.gameplay.games.ms.exceptions.GameNotFoundException;
 import com.checkm8.gameplay.games.ms.exceptions.IllegalMoveException;
@@ -102,8 +103,8 @@ public class GamesBean {
 
         boolean isWhite = validateGameToken(game, gameToken);
 
-        if (isWhite) game.setWinner("b");
-        else         game.setWinner("w");
+        if (isWhite) game.setWinner(GameWinner.BLACK);
+        else         game.setWinner(GameWinner.WHITE);
 
         game.setStatus(GameStatus.FINISHED);
     }
@@ -149,8 +150,27 @@ public class GamesBean {
 
         // play move
         board.doMove(move);
-        
         // update FEN
         game.setFen(board.getFen());
+
+        // handle end of game
+        if (board.isDraw()) {
+            game.setStatus(GameStatus.FINISHED);
+            game.setWinner(GameWinner.DRAW);
+        }
+        if (board.isMated()) {
+            game.setStatus(GameStatus.FINISHED);
+            Side sideToMove = board.getSideToMove();
+            switch (sideToMove) {
+                case BLACK:
+                    game.setWinner(GameWinner.WHITE);
+                    break;
+                case WHITE:
+                    game.setWinner(GameWinner.BLACK);
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 }
