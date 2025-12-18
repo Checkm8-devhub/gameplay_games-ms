@@ -1,5 +1,8 @@
 package com.checkm8.gameplay.games.ms.entities;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -37,10 +40,6 @@ public class Game {
         FINISHED,
     }
 
-    @Column(nullable = false)
-    private String fen;
-    public static final String STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-
     @Enumerated(EnumType.STRING)
     private GameWinner winner;
     public static enum GameWinner {
@@ -48,6 +47,12 @@ public class Game {
         BLACK,
         DRAW,
     }
+
+    @Column(nullable = false)
+    private String fen;
+    public static final String STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
+    private String ucis;
 
     public static Game createStartingGame(String whiteToken, String blackToken) {
         Game game = new Game();
@@ -58,6 +63,21 @@ public class Game {
         game.winner = null;
         
         return game;
+    }
+
+    public List<String> getUciAsList() {
+        if (this.ucis == null) return null;
+
+        List<String> uciList = new ArrayList<>();
+        for (String uci : this.ucis.split(" ")) {
+            uciList.add(uci);
+        }
+
+        return uciList;
+    }
+    public void addUciToUcis(String uci) {
+        if (this.ucis == null) this.ucis = uci;
+        else                   this.ucis += " " + uci;
     }
 
     public Integer getId() { return this.id; }
@@ -78,9 +98,13 @@ public class Game {
     public GameWinner getWinner() { return winner; }
     public void setWinner(GameWinner winner) { this.winner = winner; }
 
+    public String getUcis() { return ucis; }
+    public void setUcis(String ucis) { this.ucis = ucis; }
+
     @Override
     public String toString() {
         return "Game [id=" + id + ", whiteToken=" + whiteToken + ", blackToken=" + blackToken + ", status=" + status
-                + ", fen=" + fen + ", winner=" + winner + "]";
+                + ", winner=" + winner + ", fen=" + fen + ", ucis=" + ucis + ", getUciAsList()=" + getUciAsList() + "]";
     }
+
 }

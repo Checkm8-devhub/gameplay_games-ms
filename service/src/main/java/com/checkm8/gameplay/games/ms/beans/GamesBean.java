@@ -152,6 +152,8 @@ public class GamesBean {
         board.doMove(move);
         // update FEN
         game.setFen(board.getFen());
+        // update UCIs
+        game.addUciToUcis(modeUCI);
 
         // handle end of game
         if (board.isDraw()) {
