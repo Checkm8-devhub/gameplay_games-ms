@@ -66,7 +66,7 @@ public class Game {
     }
 
     public List<String> getUciAsList() {
-        if (this.ucis == null) return null;
+        if (this.ucis == null) return List.of();
 
         List<String> uciList = new ArrayList<>();
         for (String uci : this.ucis.split(" ")) {

@@ -1,6 +1,7 @@
 package com.checkm8.gameplay.games.ms.api.v1.resources;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -27,6 +28,10 @@ import com.checkm8.gameplay.games.ms.exceptions.InvalidGameTokenException;
 import com.checkm8.gameplay.games.ms.exceptions.InvalidUCIException;
 import com.checkm8.gameplay.games.ms.exceptions.NotYourTurnException;
 
+import io.smallrye.common.annotation.Blocking;
+import io.smallrye.mutiny.Uni;
+import io.vertx.core.Vertx;
+
 @ApplicationScoped
 @Path("games")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -38,6 +43,10 @@ public class GamesResource {
 
     @Inject
     private GamesBean gamesBean;
+
+    // for timer
+    @Inject
+    Vertx vertx;
 
     // ****************************************
     //  GET
@@ -57,6 +66,67 @@ public class GamesResource {
         if (game == null) return Response.status(Response.Status.NOT_FOUND).build();
 
         return Response.ok(game).build();
+    }
+
+    // some explanation
+    // - Uni is a lazy async container for one result. It runs when subscribed.
+    //  - .createFrom().item(...) completes with item immediatelly
+    //  - .createFrom().completionStage(...) completes when the given CompletionStage (for example CompletableFuture), completes.
+
+    private static final Long EVENT_TIMEOUT_MS = 30000L;
+    @GET
+    @Path("{id}/events")
+    @Blocking
+    public Uni<Response> getEvent(@PathParam("id") Integer id) {
+
+        // since == current uciList size of requestee
+        Integer since;
+        try {
+            since = Integer.parseInt(uriInfo.getQueryParameters().get("since").get(0));
+        } catch (Exception e) {
+            return Uni.createFrom().item(Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Missing/invalid 'since' query parameter").build());
+        }
+
+        Game game = gamesBean.get(id);
+        if (game == null) return Uni.createFrom().item(Response.status(Response.Status.NOT_FOUND).build());
+
+        // register as a waiter
+        CompletableFuture<List<String>> f = gamesBean.registerWaiter(id);
+
+        // if already behind, respond immediatelly. No need to long pool
+        List<String> list = game.getUciAsList();
+        if (since < 0) since = 0;
+        if (since > list.size()) since = list.size();
+        if (list.size() > since) {
+            gamesBean.removeWaiter(id, f);
+            return Uni.createFrom().item(Response.ok(list.subList(since, list.size())).build());
+        }
+
+        // long pool: wait up to 30s for a new event
+        // ---
+        // cleanUp after timeout:
+        // - if the future not completed yet => complete the future with empty list and remove the future
+        long timerId = vertx.setTimer(EVENT_TIMEOUT_MS, tId -> {
+            if (f.complete(List.of())) {
+                gamesBean.removeWaiter(id, f);
+            }
+        });
+        // set callback on completion. Just cancel the timer because we don't need the cleanup
+        f.whenComplete((newUci, err) -> {
+            gamesBean.removeWaiter(id, f);
+            vertx.cancelTimer(timerId);
+        });
+
+        // on completion return newUci or empty
+        return Uni.createFrom().completionStage(f)
+            .onItem().transform(newUci -> {
+                if (newUci == null || newUci.isEmpty()) {
+                    return Response.status(Response.Status.NO_CONTENT).build();
+                }
+                return Response.ok(newUci).build();
+            });
+        // ---
     }
     
     // ****************************************

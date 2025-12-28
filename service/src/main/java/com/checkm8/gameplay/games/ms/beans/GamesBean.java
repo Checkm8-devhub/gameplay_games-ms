@@ -23,6 +23,9 @@ import com.github.bhlangonijr.chesslib.Square;
 import com.github.bhlangonijr.chesslib.move.Move;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 
 @ApplicationScoped
@@ -155,6 +158,9 @@ public class GamesBean {
         // update UCIs
         game.addUciToUcis(modeUCI);
 
+        // complete futures
+        publishMove(game.getId(), List.of(modeUCI));
+
         // handle end of game
         if (board.isDraw()) {
             game.setStatus(GameStatus.FINISHED);
@@ -174,5 +180,47 @@ public class GamesBean {
                     break;
             }
         }
+    }
+
+    // long pooling
+    // some explanation:
+    // - ConcurrentHashMap is just a thread safe hashmap
+    // - CopyOnWriteArrayList copies the array on each write, making it thread safe
+    // - CompletableFuture is just a promise
+
+    private final ConcurrentHashMap<Integer, CopyOnWriteArrayList<CompletableFuture<List<String>>>> waiters =
+        new ConcurrentHashMap<>();
+
+    /**
+     * add future for game and return the future
+     */
+    public CompletableFuture<List<String>> registerWaiter(int gameId) {
+        CompletableFuture<List<String>> f = new CompletableFuture<>();
+
+        // if gameId has no waiters yet, make the list
+        waiters.computeIfAbsent(gameId, k -> new CopyOnWriteArrayList<>()).add(f);
+
+        return f;
+    }
+
+    /**
+     * remove future from game
+     */
+    public void removeWaiter(int gameId, CompletableFuture<List<String>> f) {
+        CopyOnWriteArrayList<CompletableFuture<List<String>>> list = waiters.get(gameId);
+        if (list != null)  waiters.get(gameId).remove(f);
+    }
+
+    /**
+     * complete all game futures with new uciList
+     */
+    public void publishMove(int gameId, List<String> newUci) {
+        CopyOnWriteArrayList<CompletableFuture<List<String>>> list = waiters.get(gameId);
+        if (list == null || list.isEmpty()) return;
+
+        for (CompletableFuture<List<String>> f : list) {
+            f.complete(newUci);
+        }
+        list.clear(); // clear all futures
     }
 }
