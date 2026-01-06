@@ -3,6 +3,7 @@ package com.checkm8.gameplay.games.ms.api.v1.resources;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -52,6 +53,7 @@ public class GamesResource {
     //  GET
     // ****************************************
     @GET
+    @RolesAllowed("admin")
     public Response getAll() {
 
         List<Game> games = gamesBean.getAll();
@@ -60,6 +62,7 @@ public class GamesResource {
 
     @GET
     @Path("{id}")
+    @RolesAllowed({"user", "admin"})
     public Response get(@PathParam("id") Integer id) {
 
         Game game = gamesBean.get(id);
@@ -76,6 +79,7 @@ public class GamesResource {
     private static final Long EVENT_TIMEOUT_MS = 30000L;
     @GET
     @Path("{id}/events")
+    @RolesAllowed({"user", "admin"})
     @Blocking
     public Uni<Response> getEvent(@PathParam("id") Integer id) {
 
@@ -133,6 +137,7 @@ public class GamesResource {
     //  POST
     // ****************************************
     @POST
+    @RolesAllowed("matchmaking")
     public Response create() {
 
         Game game = gamesBean.create();
@@ -149,6 +154,7 @@ public class GamesResource {
     // Expects game_token and actions in body
     @POST
     @Path("{id}/actions")
+    @RolesAllowed({"user", "admin"})
     public Response handleAction(@PathParam("id") Integer id, ActionRequest req) {
 
         if (req == null)
@@ -192,6 +198,7 @@ public class GamesResource {
     // ****************************************
     @PUT
     @Path("{id}")
+    @RolesAllowed("admin")
     public Response update(@PathParam("id") Integer id, Game game) {
 
         Game updatedGame = gamesBean.update(id, game);
@@ -204,6 +211,7 @@ public class GamesResource {
     // ****************************************
     @DELETE
     @Path("{id}")
+    @RolesAllowed("admin")
     public Response delete(@PathParam("id") Integer id) {
 
         boolean deleted = gamesBean.delete(id);
