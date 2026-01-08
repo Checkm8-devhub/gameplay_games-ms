@@ -62,7 +62,7 @@ public class GamesResource {
 
     @GET
     @Path("{id}")
-    @RolesAllowed({"user", "admin"})
+    // @RolesAllowed({"user", "admin"})
     public Response get(@PathParam("id") Integer id) {
 
         Game game = gamesBean.get(id);
