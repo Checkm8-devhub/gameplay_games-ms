@@ -110,6 +110,9 @@ public class GamesBean {
         else         game.setWinner(GameWinner.WHITE);
 
         game.setStatus(GameStatus.FINISHED);
+
+        // complete futures
+        publishMove(game.getId(), List.of("EOG"));
     }
 
     @Transactional

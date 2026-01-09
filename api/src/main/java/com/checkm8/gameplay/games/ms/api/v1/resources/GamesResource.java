@@ -22,6 +22,7 @@ import jakarta.ws.rs.core.UriInfo;
 import com.checkm8.gameplay.games.ms.api.v1.dtos.ActionRequest;
 import com.checkm8.gameplay.games.ms.beans.GamesBean;
 import com.checkm8.gameplay.games.ms.entities.Game;
+import com.checkm8.gameplay.games.ms.entities.Game.GameStatus;
 import com.checkm8.gameplay.games.ms.exceptions.GameNotFoundException;
 import com.checkm8.gameplay.games.ms.exceptions.GameNotActiveException;
 import com.checkm8.gameplay.games.ms.exceptions.IllegalMoveException;
@@ -94,6 +95,8 @@ public class GamesResource {
 
         Game game = gamesBean.get(id);
         if (game == null) return Uni.createFrom().item(Response.status(Response.Status.NOT_FOUND).build());
+        if (game.getStatus() == GameStatus.FINISHED) return Uni.createFrom().item(Response.status(Response.Status.BAD_REQUEST)
+                .entity("EOG").build());
 
         // register as a waiter
         CompletableFuture<List<String>> f = gamesBean.registerWaiter(id);
