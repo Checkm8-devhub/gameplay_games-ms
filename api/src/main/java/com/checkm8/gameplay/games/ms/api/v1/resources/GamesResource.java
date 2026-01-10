@@ -3,6 +3,12 @@ package com.checkm8.gameplay.games.ms.api.v1.resources;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -55,6 +61,11 @@ public class GamesResource {
     // ****************************************
     @GET
     @RolesAllowed("admin")
+    @Operation(summary = "List all games", description = "Admin-only. Returns all games.")
+    @APIResponse(
+      responseCode = "200",
+      description = "List of games",
+    )
     public Response getAll() {
 
         List<Game> games = gamesBean.getAll();
@@ -63,6 +74,14 @@ public class GamesResource {
 
     @GET
     @Path("{id}")
+    @Operation(summary = "Get game by id")
+    @APIResponses({
+      @APIResponse(
+        responseCode = "200",
+        description = "Game"
+      ),
+      @APIResponse(responseCode = "404", description = "Game not found")
+    })
     // @RolesAllowed({"user", "admin"})
     public Response get(@PathParam("id") Integer id) {
 
@@ -82,6 +101,22 @@ public class GamesResource {
     @Path("{id}/events")
     @RolesAllowed({"user", "admin"})
     @Blocking
+    @Operation(
+      summary = "Long-poll game events",
+      description = "Requires query param `since` (client move count). Returns new UCI moves or 204 if none in 30s. Returns 400 with 'EOG' if game finished."
+    )
+    @APIResponses({
+      @APIResponse(
+        responseCode = "200",
+        description = "New UCI moves since index"
+      ),
+      @APIResponse(responseCode = "204", description = "No new events within timeout"),
+      @APIResponse(
+        responseCode = "400",
+        description = "Missing/invalid since, or EOG"
+      ),
+      @APIResponse(responseCode = "404", description = "Game not found")
+    })
     public Uni<Response> getEvent(@PathParam("id") Integer id) {
 
         // since == current uciList size of requestee
@@ -141,6 +176,11 @@ public class GamesResource {
     // ****************************************
     @POST
     @RolesAllowed("matchmaking")
+    @Operation(summary = "Create a game", description = "Matchmaking-only. Returns id + white/black tokens.")
+    @APIResponse(
+      responseCode = "201",
+      description = "Created"
+      )
     public Response create() {
 
         Game game = gamesBean.create();
@@ -158,6 +198,18 @@ public class GamesResource {
     @POST
     @Path("{id}/actions")
     @RolesAllowed({"user", "admin"})
+    @Operation(summary = "Submit action (move or resign)")
+    @APIResponses({
+      @APIResponse(responseCode = "200", description = "OK"
+      ),
+      @APIResponse(responseCode = "400", description = "Bad request"
+      ),
+      @APIResponse(responseCode = "403", description = "Forbidden"
+      ),
+      @APIResponse(responseCode = "404", description = "Game not found"
+      ),
+      @APIResponse(responseCode = "500", description = "Internal server error")
+    })
     public Response handleAction(@PathParam("id") Integer id, ActionRequest req) {
 
         if (req == null)
@@ -202,6 +254,12 @@ public class GamesResource {
     @PUT
     @Path("{id}")
     @RolesAllowed("admin")
+    @Operation(summary = "Update a game", description = "Admin-only.")
+    @APIResponses({
+      @APIResponse(responseCode = "200", description = "Updated"
+      ),
+      @APIResponse(responseCode = "404", description = "Game not found")
+    })
     public Response update(@PathParam("id") Integer id, Game game) {
 
         Game updatedGame = gamesBean.update(id, game);
@@ -215,6 +273,11 @@ public class GamesResource {
     @DELETE
     @Path("{id}")
     @RolesAllowed("admin")
+    @Operation(summary = "Delete a game", description = "Admin-only.")
+    @APIResponses({
+      @APIResponse(responseCode = "204", description = "Deleted"),
+      @APIResponse(responseCode = "404", description = "Game not found")
+    })
     public Response delete(@PathParam("id") Integer id) {
 
         boolean deleted = gamesBean.delete(id);
