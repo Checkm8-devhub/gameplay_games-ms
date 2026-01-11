@@ -64,7 +64,7 @@ public class GamesResource {
     @Operation(summary = "List all games", description = "Admin-only. Returns all games.")
     @APIResponse(
       responseCode = "200",
-      description = "List of games",
+      description = "List of games"
     )
     public Response getAll() {
 

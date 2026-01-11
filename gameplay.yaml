@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gameplay-games-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gameplay-games
+  template:
+    metadata:
+      labels:
+        app: gameplay-games
+    spec:
+      containers:
+        - name: gameplay-games
+          image: checkm8-gameplay_games:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gameplay-games
+spec:
+  type: ClusterIP
+  selector:
+    app: gameplay-games
+  ports:
+    - port: 8080
+      targetPort: 8080
